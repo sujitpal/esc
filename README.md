@@ -9,3 +9,5 @@ The indexing subsystem uses Akka to partition the parsing and indexing work acro
 
 The (upcoming) search subsystem is expected to use Play.
 
+The documents used for development and testing are taken from the [Enron Email DataSet](http://www.cs.cmu.edu/~enron/).
+
