@@ -1,0 +1,24 @@
+@(result: SearchResult)
+
+@import helper._
+
+@main("Search with ElasticSearch - HTML results") {
+  <h2>Search Results</h2>
+  <p><b>@result.meta("start") to @result.meta("end") results of @result.meta("numFound") in @result.meta("QTime") ms</b></p>
+  <hr/>
+  <p><b>JSON Query: </b>@result.meta("query_json")</p>
+  <hr/>
+  @for(doc <- result.docs) {
+    <fieldset>
+      <table cellspacing="0" cellpadding="0" border="1" width="100%">
+      @for((fieldname, fieldvalue) <- doc) {
+        <tr valign="top">
+          <td width="20%"><b>@fieldname</b></td>
+          <td width="80%">@fieldvalue</td>
+        </tr>
+      }
+      </table>
+    </fieldset>
+  }
+  <hr/>
+}
