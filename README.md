@@ -1,7 +1,7 @@
 esc
 ===
 
-A search/index client for [ElasticSearch[(http://www.elasticsearch.org/) written using the tools in the [Typesafe Stack](http://typesafe.com/stack) - Scala, Akka and Play. 
+A search/index client for [ElasticSearch](http://www.elasticsearch.org/) written using the tools in the [Typesafe Stack](http://typesafe.com/stack) - Scala, Akka and Play. 
 
 The client communicates with ElasticSearch using its JSON/HTTP REST interface. The indexing subsystem is a command line application that uses Akka actors to parallelize the parsing and indexing of a corpus of documents across multiple Actors. The search subsystem is a Play2 web application that provides a form based search interface and results in either HTML (for human consumption and experimentation) and JSON (the native output).
 
