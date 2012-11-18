@@ -43,7 +43,7 @@ object Searcher {
         "end" -> (params.start + params.rows),
         "query_json" -> payload,
         "numFound" -> (rsp \ "hits" \ "total").asOpt[Int].get,
-        "maxScore" -> (rsp \ "hits" \ "max_score").asOpt[Float].get
+        "maxScore" -> (rsp \ "hits" \ "max_score").asOpt[Float].getOrElse(0.0F)
       )
     }
     val docs = if (meta.contains("error")) Seq()
