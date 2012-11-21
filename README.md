@@ -48,5 +48,5 @@ The search subsystem uses play as its build subsystem. To run, follow these step
 
 For more/related information, you may also want to take a look at my blog posts about these two applications.
 * [Indexing into ElasticSearch with Akka and Scala](http://sujitpal.blogspot.com/2012/11/indexing-into-elasticsearch-with-akka.html)
-* [An ElasticSearch Web Client with Scala and Play2]http://sujitpal.blogspot.com/2012/11/an-elasticsearch-web-client-with-scala.html() 
+* [An ElasticSearch Web Client with Scala and Play2](http://sujitpal.blogspot.com/2012/11/an-elasticsearch-web-client-with-scala.html) 
 
