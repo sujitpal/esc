@@ -1,14 +1,39 @@
 esc
 ===
 
+What the project does, the problem it solves, etc.
+--------------------------------------------------
+
 A search/index client for [ElasticSearch](http://www.elasticsearch.org/) written using the tools in the [Typesafe Stack](http://typesafe.com/stack) - Scala, Akka and Play. 
 
 The client communicates with ElasticSearch using its JSON/HTTP REST interface. The indexing subsystem is a command line application that uses Akka actors to parallelize the parsing and indexing of a corpus of documents across multiple Actors. The search subsystem is a Play2 web application that provides a form based search interface and results in either HTML (for human consumption and experimentation) and JSON (the native output).
 
 The documents used for development and testing are taken from the [Enron Email DataSet](http://www.cs.cmu.edu/~enron/).
 
-Index
------
+The project is aimed at a developer or search QA engineer to try out various qieries against an ElasticSearch index and quickly and easily get feedback about the results. ElasticSearch queries are written as JSON documents, which is also available in the results of this tool. The JSON document can be copy-pasted into the developer's search code.
+
+Why it does it this way, benefits and drawbacks
+-----------------------------------------------
+
+The benefit of using this application is convenience. Using the form to experiment with search parameters is more convenient than using curl on the command line. It is also more suitable for less technical users who nevertheless need to interact with search results prior to them being available in the application (eg search QA engineers).
+
+The drawback is that the form is not as flexible as hand-crafted JSON queries. The ElasticSearch Query DSL is very rich, and the richness has not been fully captured in the application because it would make the form very complex and negate the convenience of having this kind of application.
+
+High-level design and architecture
+----------------------------------
+
+### Index ###
+
+The index subsystem is built using Akka actors. There is one reaper actor and one master actor which spawns a configurable number of worker actors. The master actor walks the directory tree of files and writes out the files into the worker actor's mailboxes using a round-robin strategy. Each worker actor parses the file into a set of name-value pairs, adds the document to the ElasticSearch index using a JSON over HTTP POST request. When all the files are processed, the worker sends a message to the reaper actor and shuts itself down, including the worker actors. The reaper actor sends a signal to shut the entire application down (this does not seem to work, the signal is received but the application has to be terminated from the console with a CTRL-C).
+
+### Search ###
+
+The search subsystem is a Play2 web application. It has a single form which is responsible for collecting the search parameters, and two output pages. The first one returns an HTML formatted (human readable) view of the search results, as well as the query JSON used to generate the results, and the second one shows the raw JSON output from ElasticSearch.
+
+Instructions that detail how the project is compiled, deployed and used.
+------------------------------------------------------------------------
+
+### Index ###
 
 The index subsystem uses sbt as its build system. To run, follow these steps:
 
@@ -26,8 +51,7 @@ The index subsystem uses sbt as its build system. To run, follow these steps:
 5. If you are _not_ planning on using the Enron dataset, then please see "Using your own Data Corpus" below.
 6. The index application runs using sbt, so you can start the indexing by running "cd index; sbt run" from the command line.
 
-Using your own Data Corpus
---------------------------
+### Using your own Data Corpus ###
 
 The index application provides a simple traits based plugin mechanism to support data sets other than the Enron data. The traits that need to be extended are in the ExtensionPoints.scala file. The Enron dataset is an example of this extension mechanism, the implementations for the Enron dataset are in Enron.scala. For a new dataset, use Enron.scala as an example and build your own implementations, then update the class names for the implementations in conf/indexer.properties.
   * parserClass - full class name for the Parser implementation. This defines a function that transforms a Source into a Map of field name, field value pairs.
@@ -35,8 +59,7 @@ The index application provides a simple traits based plugin mechanism to support
   * schemaClass - full class name for the schema implementation. This returns the payload for the ElasticSearch put_mapping call for this dataset.
 
 
-Search
-------
+### Search ###
 
 The search subsystem uses play as its build subsystem. To run, follow these steps.
 
@@ -45,6 +68,9 @@ The search subsystem uses play as its build subsystem. To run, follow these step
 3. Start the application using "cd search; play run". This will start the Play2 server on port 9000.
 4. On the browser, enter http://localhost:9000. You should see a form that prompts for various parameters that you would pass to an ElasticSearch index in order to query it.
 5. You can choose to see human readable HTML results or raw JSON output returned by ElasticSearch based on the Output Type paramter (HTML or JSON).
+
+More Information
+----------------
 
 For more/related information, you may also want to take a look at my blog posts about these two applications.
 * [Indexing into ElasticSearch with Akka and Scala](http://sujitpal.blogspot.com/2012/11/indexing-into-elasticsearch-with-akka.html)
