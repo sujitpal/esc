@@ -30,7 +30,6 @@ object Searcher {
     val payload = Searcher.buildQuery(params)
     val rawResponse = WS.url(server + params.index + 
       "/_search?pretty=true").post(payload).value.get.body
-    println("response=" + rawResponse)
     val rsp = Json.parse(rawResponse)
     val meta = (rsp \ "error").asOpt[String] match {
       case Some(x) => Map(
@@ -43,6 +42,7 @@ object Searcher {
         "end" -> (params.start + params.rows),
         "query_json" -> payload,
         "numFound" -> (rsp \ "hits" \ "total").asOpt[Int].get,
+        // maxScore == null when sort is selected
         "maxScore" -> (rsp \ "hits" \ "max_score").asOpt[Float].getOrElse(0.0F)
       )
     }
@@ -53,7 +53,7 @@ object Searcher {
         "_id" -> (hit \ "_id"),
         "_score" -> (hit \ "_score")))
       val fields = hits.map(hit => 
-        (hit \ "_source").asOpt[Map[String,JsValue]].get)
+        (hit \ "fields").asOpt[Map[String,JsValue]].get)
       idscores.zip(fields).
         map(tuple => tuple._1 ++ tuple._2).
         map(doc => doc.toSeq.sortWith((doc1, doc2) => doc1._1 < doc2._1))
@@ -82,8 +82,9 @@ object Searcher {
         else (field, "")).map(tuple => 
           if (tuple._2.isEmpty) Json.toJson(tuple._1)
           else Json.toJson(Map(tuple._1 -> tuple._2))))  
-    val queryFields = if (params.fieldlist.isEmpty) null
-      else Json.toJson(params.fieldlist.split(",").map(_.trim))
+    val queryFields = Json.toJson(
+      if (params.fieldlist.isEmpty) Array("*")
+      else params.fieldlist.split(",").map(_.trim))
     val queryHighlight = if (params.highlightfields.isEmpty) null
       else {
         val fields = params.highlightfields.split(",").map(_.trim)

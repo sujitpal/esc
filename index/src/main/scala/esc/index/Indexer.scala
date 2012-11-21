@@ -10,7 +10,7 @@ import akka.actor.actorRef2Scala
 import akka.actor.{Props, ActorSystem, ActorRef, Actor}
 import akka.routing.RoundRobinRouter
 import play.api.libs.json.Json
-import play.libs.WS
+import play.api.libs.ws.WS
 
 object Indexer extends App {
 
@@ -22,7 +22,8 @@ object Indexer extends App {
   val server1 = List(props("serverName"), 
       props("indexName"), 
       props("mappingName")).foldRight("")(_ + "/" + _)
-
+      
+  play.core.server.NettyServer.main(Array())
   indexFiles(props)
     
   /////////////// end main /////////////////
@@ -75,6 +76,7 @@ object Indexer extends App {
         createIndex()
         createSchema()
         for (file <- files) {
+          println("loading file " + file + " to queue")
           nreqs = nreqs + 1
           router ! IndexMsg(file) 
         }
@@ -142,15 +144,16 @@ object Indexer extends App {
       root #:: root.listFiles.toStream.flatMap(walk(_))
     else root #:: Stream.empty
   }
-
+  
   def sendToServer(server: String, payload: String, 
       usePost: Boolean): Int = {
-    val rsp = if (usePost) WS.url(server).post(payload).get
-              else WS.url(server).put(payload).get
-    val rspBody = Json.parse(rsp.getBody)
-    (rspBody \ "ok").asOpt[Boolean] match {
-      case Some(true) => 0
-      case _ => -1
-    }
+    val prom = if (usePost) WS.url(server).post(payload)
+      else WS.url(server).put(payload)
+    prom.map(response => {
+      (Json.parse(response.body) \ "ok").asOpt[Boolean] match {
+        case Some(true) => 0
+        case _ => -1
+      }
+    }).await.get
   }
 }
