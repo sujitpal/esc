@@ -46,3 +46,7 @@ The search subsystem uses play as its build subsystem. To run, follow these step
 4. On the browser, enter http://localhost:9000. You should see a form that prompts for various parameters that you would pass to an ElasticSearch index in order to query it.
 5. You can choose to see human readable HTML results or raw JSON output returned by ElasticSearch based on the Output Type paramter (HTML or JSON).
 
+For more/related information, you may also want to take a look at my blog posts about these two applications.
+* [Indexing into ElasticSearch with Akka and Scala](http://sujitpal.blogspot.com/2012/11/indexing-into-elasticsearch-with-akka.html)
+* [An ElasticSearch Web Client with Scala and Play2]http://sujitpal.blogspot.com/2012/11/an-elasticsearch-web-client-with-scala.html() 
+
